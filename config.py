@@ -5,12 +5,56 @@ Centralised settings for preprocessing, model, and training.
 Matches the official baseline (MTRCNN, arXiv 2603.20118).
 """
 
+import subprocess
 from pathlib import Path
 
 # ═══════════════════════════════════════════════════════════════════
-# Paths (GCP Instance)
+# Paths (GCP Instance) — Auto-detection
 # ═══════════════════════════════════════════════════════════════════
-DATA_ROOT = Path.home() / "Development_data" / "Development_data"
+
+def _find_data_root() -> Path:
+    """Auto-detect where the .wav files actually live."""
+    candidates = [
+        Path.home() / "Development_data" / "Development_data",
+        Path.home() / "Development_data",
+        Path.home() / "mosquito123" / "Development_data" / "Development_data",
+        Path.home() / "mosquito123" / "Development_data",
+        Path("/home/jupyter/Development_data/Development_data"),
+        Path("/home/jupyter/Development_data"),
+        Path(".") / "Development_data" / "Development_data",
+        Path(".") / "Development_data",
+    ]
+    
+    for p in candidates:
+        if p.exists():
+            # Check for wav files directly
+            wavs = list(p.glob("S_*_D_*.wav"))
+            if wavs:
+                return p
+            # Check one level deeper
+            for sub in p.iterdir():
+                if sub.is_dir():
+                    wavs = list(sub.glob("S_*_D_*.wav"))
+                    if wavs:
+                        return sub
+    
+    # Fallback: brute-force recursive search from home
+    home = Path.home()
+    try:
+        result = subprocess.run(
+            ["find", str(home), "-maxdepth", "5", "-name", "S_1_D_1_0.wav", "-type", "f"],
+            capture_output=True, text=True, timeout=30
+        )
+        if result.stdout.strip():
+            found = Path(result.stdout.strip().split("\n")[0]).parent
+            return found
+    except Exception:
+        pass
+    
+    # Return best guess, will fail later with clear error
+    return Path.home() / "Development_data" / "Development_data"
+
+DATA_ROOT = _find_data_root()
 OUTPUT_DIR = Path.home() / "outputs"
 CHECKPOINT_DIR = OUTPUT_DIR / "checkpoints"
 LOG_DIR = OUTPUT_DIR / "logs"

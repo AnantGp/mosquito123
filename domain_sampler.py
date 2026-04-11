@@ -47,9 +47,39 @@ FILENAME_PATTERN = re.compile(r"^S_(\d+)_D_(\d+)_(\d+)\.wav$")
 
 def parse_dataset(data_root: Path = DATA_ROOT) -> List[Dict]:
     """Parse all wav files and return list of metadata dicts."""
-    records = []
+    
+    # ── Diagnostics ──
+    print(f"DATA_ROOT = {data_root}")
+    print(f"  exists?  {data_root.exists()}")
+    if data_root.exists():
+        contents = list(data_root.iterdir())
+        dirs = [c.name for c in contents if c.is_dir()][:10]
+        files = [c.name for c in contents if c.is_file()][:10]
+        print(f"  dirs:    {dirs}")
+        print(f"  files:   {files[:5]}..." if len(files) > 5 else f"  files:   {files}")
+        print(f"  total items: {len(contents)}")
+    else:
+        print("  ✗ Directory does NOT exist!")
+        print(f"  Listing parent: {data_root.parent}")
+        if data_root.parent.exists():
+            for item in data_root.parent.iterdir():
+                print(f"    {'[DIR]' if item.is_dir() else '[FILE]'} {item.name}")
+        return []
+    
+    # ── Try direct glob ──
     wav_files = sorted(data_root.glob("*.wav"))
     
+    # ── If no wavs found, search recursively ──
+    if not wav_files:
+        print(f"  No .wav files directly in {data_root}, searching recursively...")
+        wav_files = sorted(data_root.rglob("*.wav"))
+        if wav_files:
+            # Update data_root to the actual directory
+            actual_dir = wav_files[0].parent
+            print(f"  Found {len(wav_files):,} .wav files in: {actual_dir}")
+            wav_files = sorted(actual_dir.glob("*.wav"))
+    
+    records = []
     for f in wav_files:
         m = FILENAME_PATTERN.match(f.name)
         if m:
@@ -60,7 +90,10 @@ def parse_dataset(data_root: Path = DATA_ROOT) -> List[Dict]:
                 "clip_index": int(m.group(3)),
             })
     
-    print(f"Parsed {len(records):,} files from {data_root}")
+    print(f"\n✓ Parsed {len(records):,} / {len(wav_files):,} files from {data_root}")
+    if not records and wav_files:
+        print(f"  WARNING: Found {len(wav_files)} .wav files but none matched pattern S_<N>_D_<N>_<N>.wav")
+        print(f"  Sample filenames: {[f.name for f in wav_files[:5]]}")
     return records
 
 
