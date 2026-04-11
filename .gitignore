@@ -1,0 +1,24 @@
+# Data
+Development_data/
+Development_data.zip
+*.wav
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Outputs
+outputs/
+checkpoints/
+logs/
+*.png
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
