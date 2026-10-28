@@ -2,8 +2,14 @@
 
 Competition entry for the [BioDCASE 2026 Challenge](https://arxiv.org/abs/2603.20118).
 
+## Contribution
+
+Anant Gupta reviewed related research, designed the spectrogram structure, developed the approach and contributed code. The Git history also records contributions under the name Aditya Gupta; commit metadata alone does not establish each person's complete contribution.
+
 ## Challenge
 Classify 9 mosquito species across 5 recording domains, optimizing for **unseen-domain generalization** (`BA_unseen`).
+
+The figures below are challenge baseline figures, **not** this repository's final competition score.
 
 | Metric | Baseline (MTRCNN) |
 |--------|------------------|
@@ -19,6 +25,19 @@ Classify 9 mosquito species across 5 recording domains, optimizing for **unseen-
 | `domain_sampler.py` | Domain-Balanced Sampler, Dataset, LODO splits, SpecAugment |
 | `train.py` | Training pipeline with MTRCNN + domain-adversarial option |
 | `BioDCASE2026_EDA.ipynb` | Comprehensive EDA notebook |
+
+## Processing overview
+
+```text
+Audio recordings + species/domain labels
+  -> waveform loading and preprocessing
+  -> log-mel spectrograms
+  -> domain-balanced sampling and optional SpecAugment
+  -> MTRCNN training, optionally with domain-adversarial learning
+  -> held-out-domain evaluation
+```
+
+The intended hold-out-domain workflow is described in the training code. The repository does not contain a verified final competition score, trained weights, or a self-contained copy of the challenge data. Results and reproducibility depend on the dataset, environment, configuration and evaluation split.
 
 ## Quick Start (GCP)
 
