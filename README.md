@@ -58,8 +58,8 @@ python train.py --test_domain 0 --strategy equal --domain_adversarial
 python train.py --test_domain 0 --species_stratified --domain_adversarial
 ```
 
-## Key Innovation: Domain-Balanced Sampling
-D5 has ~265k clips vs D1 with ~200. Without balancing, the model memorizes domain artifacts instead of species cues. Our sampler forces equal domain representation per mini-batch.
+## Approach: domain-balanced sampling
+Domain sizes are highly imbalanced (D5 has ~265k clips; D1 has ~200). Without balancing, a model can learn domain artifacts instead of species cues. The sampler draws equal domain representation per mini-batch. Its effect on `BA_unseen` has not yet been measured against the baseline in this repository.
 
 ## Dataset
 - 271,380 clips | 60.66 hours | 9 species | 5 domains
